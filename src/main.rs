@@ -6,7 +6,7 @@ mod fun;
 mod music;
 
 fn main() {
-    music::play_metal_crusher_music();
+    music::play_audio();
 
     fun::notify("Fun things will happen soon", ":D");
 
