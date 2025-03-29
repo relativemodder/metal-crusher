@@ -88,6 +88,15 @@ pub fn execute_shell(command: &str) {
     std::process::Command::new("sh").arg("-c").arg(command).spawn().unwrap();
 }
 
+pub fn set_kde_brightness(brightness: u32) {
+    let _m = FUN_INSTANCE.connection.call_method(
+        Some("org.freedesktop.PowerManagement"),
+        "/org/kde/Solid/PowerManagement/Actions/BrightnessControl",
+        Some("org.kde.Solid.PowerManagement.Actions.BrightnessControl"),
+        "setBrightness",
+        &(brightness),);
+}
+
 pub fn detect_terminal() -> &'static str {
     let terminals = ["ghostty", "konsole", "alacritty", "gnome-terminal", "xterm"];
     for terminal in terminals {
