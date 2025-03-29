@@ -45,6 +45,8 @@ fn main() {
 
         fun::execute_shell(format!("killall -9 {}", user_terminal).as_str());
         std::thread::sleep(std::time::Duration::from_millis(1200));
+
+        fun::reanimate_gui_shell();
     }
 
 
@@ -69,12 +71,37 @@ fn main() {
     }
 
     {
-        fun::destroy_gui_shell();
 
         fun::execute_shell(format!("killall -9 {}", user_terminal).as_str());
         std::thread::sleep(std::time::Duration::from_millis(1200));
-        
+
         fun::destroy_file_managers();
+    }
+
+    {
+        std::thread::sleep(std::time::Duration::from_millis(2000));
+        fun::toggle_desktop_overview();
+        fun::put_random_shit_on_desktop();
+        fun::toggle_desktop_overview();
+
+        let links_wave_1: [&'static str; 5] = [
+            "xdg-open https://www.youtube.com/@notrlt", 
+            "xdg-open https://www.google.com/search?q=linux", 
+            "xdg-open https://2ip.io", 
+            "xdg-open https://github.com/relativemodder/metal-crusher", 
+            "xdg-open https://www.newgrounds.com/audio/listen/1413480"
+        ];
+
+        for link in links_wave_1 {
+            fun::execute_shell(link);
+            fun::execute_shell("");
+            std::thread::sleep(std::time::Duration::from_millis(1500));
+        }
+
+        for _ in 0..7 {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            fun::toggle_desktop_overview();
+        }
     }
 
     

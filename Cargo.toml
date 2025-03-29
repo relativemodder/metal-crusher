@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 rand = "0.9.0"
 rodio = "0.20.1"
+xdg-user = "0.2.1"
 zbus = "5.5.0"
