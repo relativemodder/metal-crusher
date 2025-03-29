@@ -1,0 +1,8 @@
+[package]
+name = "metal-crusher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rodio = "0.20.1"
+zbus = "5.5.0"
