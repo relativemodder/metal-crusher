@@ -38,18 +38,31 @@ pub fn notify(title: &str, body: &str) {
 
 
 pub fn toggle_desktop_overview() {
-    let _m = FUN_INSTANCE.connection.call_method(
-        Some("org.kde.plasmashell"),
-        "/PlasmaShell",
-        Some("org.kde.PlasmaShell"),
-        "toggleDashboard",
-        &(),); // KDE Plasma
+    if is_kde_plasma() {
+        let _m = FUN_INSTANCE.connection.call_method(
+            Some("org.kde.plasmashell"),
+            "/PlasmaShell",
+            Some("org.kde.PlasmaShell"),
+            "toggleDashboard",
+            &(),); // KDE Plasma
+    }
+
+    if is_gnome() {
+        let gnome_command = "dbus-send --session --dest=org.gnome.Shell --type=method_call /org/gnome/Shell org.freedesktop.DBus.Properties.Set string:org.gnome.Shell string:OverviewActive variant:boolean:true";
+        execute_shell(gnome_command);
+    }
 }
 
 pub fn is_kde_plasma() -> bool {
     let xdg_current_desktop = std::env::var("XDG_CURRENT_DESKTOP");
 
     xdg_current_desktop.is_ok() && xdg_current_desktop.unwrap().contains("KDE")
+}
+
+pub fn is_gnome() -> bool {
+    let xdg_current_desktop = std::env::var("XDG_CURRENT_DESKTOP");
+
+    xdg_current_desktop.is_ok() && xdg_current_desktop.unwrap().contains("GNOME")
 }
 
 pub fn reanimate_gui_shell() {
