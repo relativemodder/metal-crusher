@@ -19,10 +19,10 @@ jobs:
     - name: Install ALSA dev libs
       run: |
         sudo apt-get update
-        sudo apt-get upgrade
         sudo apt-get install -y libasound2-dev
         sudo apt-get install -y libzita-alsa-pcmi-dev
         sudo apt-get install librust-alsa-sys-dev
+        sudo apt-get install -y libx11-dev
 
     - uses: actions/checkout@v4
     - name: Build
