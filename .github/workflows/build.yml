@@ -23,6 +23,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libasound2-dev
+        sudo apt-get install librust-alsa-sys-dev
+        
     
     - uses: actions/upload-artifact@v4
       with: 
