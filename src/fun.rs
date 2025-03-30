@@ -1,3 +1,5 @@
+use std::ops::Deref;
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use std::{collections::HashMap, sync::LazyLock};
@@ -9,18 +11,20 @@ use x11::xlib;
 
 struct State {
     connection: Connection,
+    gnome_overview_state: bool
 }
 
 impl State {
     fn new() -> Self {
         State {
             connection: establish_dbus_connection(),
+            gnome_overview_state: false
         }
     }
 }
 
 static FUN_INSTANCE: LazyLock<State> = std::sync::LazyLock::new(|| State::new());
-
+static GNOME_OVERVIEW_STATE: Mutex<bool> = Mutex::new(false);
 
 fn establish_dbus_connection() -> Connection {
     connection::Builder::session().unwrap().build().unwrap()
@@ -41,6 +45,8 @@ pub fn notify(title: &str, body: &str) {
 
 
 pub fn toggle_desktop_overview() {
+    static mut GNOME_STATE: Option<bool> = Some(false);
+
     if is_kde_plasma() {
         let _m = FUN_INSTANCE.connection.call_method(
             Some("org.kde.plasmashell"),
@@ -51,8 +57,17 @@ pub fn toggle_desktop_overview() {
     }
 
     if is_gnome() {
-        let gnome_command = "dbus-send --session --dest=org.gnome.Shell --type=method_call /org/gnome/Shell org.freedesktop.DBus.Properties.Set string:org.gnome.Shell string:OverviewActive variant:boolean:true";
-        execute_shell(gnome_command);
+
+        unsafe { GNOME_STATE = Some(!GNOME_STATE.unwrap()) };
+
+
+        if unsafe { GNOME_STATE.unwrap() } {
+            let gnome_command = "dbus-send --session --dest=org.gnome.Shell --type=method_call /org/gnome/Shell org.freedesktop.DBus.Properties.Set string:org.gnome.Shell string:OverviewActive variant:boolean:true";
+            execute_shell(gnome_command);
+        } else {
+            let gnome_command = "dbus-send --session --dest=org.gnome.Shell --type=method_call /org/gnome/Shell org.freedesktop.DBus.Properties.Set string:org.gnome.Shell string:OverviewActive variant:boolean:false";
+            execute_shell(gnome_command);
+        }
     }
 }
 
@@ -156,7 +171,7 @@ pub fn set_kde_brightness(brightness: u32) {
 }
 
 pub fn detect_terminal() -> &'static str {
-    let terminals = ["ghostty", "konsole", "alacritty", "gnome-terminal", "xterm"];
+    let terminals = ["kgx", "ghostty", "konsole", "alacritty", "gnome-terminal", "xterm"];
     for terminal in terminals {
         let path = format!("/usr/bin/{}", terminal);
         if std::path::Path::new(&path).exists() {
