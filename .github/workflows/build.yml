@@ -15,9 +15,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose --release
     
     - name: Install ALSA dev libs
       run: |
@@ -31,6 +28,9 @@ jobs:
         sudo apt install --reinstall -y libasound2-dev
         sudo apt-get install -y libudev-dev
 
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose --release
     
     - uses: actions/upload-artifact@v4
       with: 
